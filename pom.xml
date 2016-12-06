@@ -154,7 +154,7 @@
                     "parents": [ ],
                     "properties": {}
                   }
-                  for (i = 0; i < parents.length; i+=2) {
+                  for (i = 0; i < parents.length; i++) {
                     config.parents.push(parents[i].trim() + parentVersions);
                   }
 
