@@ -156,7 +156,6 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
 
     @Name("secondsOrMilliseconds")
     @Description("If the source field is a long, is it in seconds or milliseconds?")
-    @Macro
     @Nullable
     private final String secondsOrMilliseconds;
 
