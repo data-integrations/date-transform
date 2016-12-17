@@ -100,4 +100,22 @@ public class DateTransformTest {
         Assert.assertEquals(df2.format(new Date(ts)), emitter.getEmitted().get(0).get("c"));
         Assert.assertEquals(df2.format(new Date(ts)), emitter.getEmitted().get(0).get("d"));
     }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSourceFormatError() throws Exception {
+    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "1234sdfg",
+                                                               "b", "yyyy-MM-dd",
+                                                               null, OUTPUT.toString());
+    Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
+    transform.initialize(null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testTargetFormatError() throws Exception {
+    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "yyyy-MM-dd",
+                                                               "b", "1234523909r",
+                                                               null, OUTPUT.toString());
+    Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
+    transform.initialize(null);
+  }
 }

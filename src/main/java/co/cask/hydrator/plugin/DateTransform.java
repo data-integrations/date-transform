@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package co.cask.hydrator.plugin;
 
 import co.cask.cdap.api.annotation.Description;
@@ -26,6 +27,7 @@ import co.cask.cdap.etl.api.Emitter;
 import co.cask.cdap.etl.api.PipelineConfigurer;
 import co.cask.cdap.etl.api.Transform;
 import co.cask.cdap.etl.api.TransformContext;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +53,10 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
   private final MyConfig config;
   private DateFormat inputFormat;
   private DateFormat outputFormat;
+  private Schema outputSchema;
+  private List<Schema.Field> outputFields;
 
-  // This is only required for testing.
+  @VisibleForTesting
   public DateTransform(MyConfig config) {
     this.config = config;
   }
@@ -72,10 +76,10 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
   public void initialize(TransformContext context) throws Exception {
     super.initialize(context);
     config.validateWithMacros();
-    inputFormat = (Strings.isNullOrEmpty(config.sourceFormat)) ? new SimpleDateFormat(DEFAULT_FORMAT)
-                                                : new SimpleDateFormat(config.sourceFormat);
-    outputFormat = (Strings.isNullOrEmpty(config.targetFormat)) ? new SimpleDateFormat(DEFAULT_FORMAT)
-                                                 : new SimpleDateFormat(config.targetFormat);
+    inputFormat = new SimpleDateFormat(config.sourceFormat);
+    outputFormat = new SimpleDateFormat(config.targetFormat);
+    outputSchema = Schema.parseJson(config.schema);
+    outputFields = Schema.parseJson(config.schema).getFields();
   }
 
   @Override
@@ -135,35 +139,43 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
             "If the field is a long, it is assumed to be a unix timestamp in milliseconds, and no source format is " +
             "needed. Use commas for multiple fields.")
     @Macro
-    private final String sourceField;
+    private String sourceField;
 
     @Name(SOURCE_FORMAT_NAME)
     @Description("The simple date format for the input field. If the input field is a long, this can be omitted.")
     @Macro
     @Nullable
-    private final String sourceFormat;
+    private String sourceFormat;
 
     @Name(TARGET_FIELD_NAME)
     @Description("The field in the output record to put the formatted date. Use commas for multiple fields.")
     @Macro
-    private final String targetField;
+    private String targetField;
 
     @Name(TARGET_FORMAT_NAME)
     @Description("The simple date format for the output field.")
     @Macro
     @Nullable
-    private final String targetFormat;
+    private String targetFormat;
 
     @Name("secondsOrMilliseconds")
     @Description("If the source field is a long, is it in seconds or milliseconds?")
     @Nullable
-    private final String secondsOrMilliseconds;
+    private String secondsOrMilliseconds;
 
     @Name("schema")
     @Description("Specifies the schema of the records outputted from this plugin.")
-    private final String schema;
+    private String schema;
 
-    public MyConfig(String sourceField, String sourceFormat, String targetField, String targetFormat,
+    public MyConfig() {
+      this.sourceFormat = DEFAULT_FORMAT;
+      this.targetFormat = DEFAULT_FORMAT;
+      this.secondsOrMilliseconds = "Milliseconds";
+    }
+
+    @VisibleForTesting
+    public MyConfig(String sourceField, @Nullable String sourceFormat,
+                    String targetField, @Nullable String targetFormat,
                     @Nullable String secondsOrMilliseconds, String schema) {
       this.sourceField = sourceField;
       this.sourceFormat = sourceFormat;
