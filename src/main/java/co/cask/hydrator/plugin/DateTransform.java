@@ -84,14 +84,11 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
 
   @Override
   public void transform(StructuredRecord input, Emitter<StructuredRecord> emitter) throws Exception {
-    Schema outputSchema = Schema.parseJson(config.schema);
-    List<Schema.Field> fields = outputSchema.getFields();
-
     StructuredRecord.Builder builder = StructuredRecord.builder(outputSchema);
     List<String> sourceFields = config.getSourceFields();
     List<String> targetFields = config.getTargetFields();
 
-    for (Schema.Field field : fields) {
+    for (Schema.Field field : outputFields) {
       String name = field.getName();
       if (input.get(name) != null && !targetFields.contains(name)) {
         builder.set(name, input.get(name));
@@ -116,9 +113,12 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
           }
           Date date = new Date(ts);
           builder.convertAndSet(targetField, outputFormat.format(date));
-        } else {
+        } else if (inputFieldType == Schema.Type.STRING) {
           Date date = inputFormat.parse(String.valueOf(input.get(sourceField)));
           builder.convertAndSet(targetField, outputFormat.format(date));
+        } else {
+          throw new IllegalArgumentException("Input field type must be a long or a string but was: " +
+                                               inputFieldType.name());
         }
       }
     }

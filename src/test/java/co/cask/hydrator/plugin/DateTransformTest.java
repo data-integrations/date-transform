@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package co.cask.hydrator.plugin;
 
 import co.cask.cdap.api.data.format.StructuredRecord;
@@ -38,6 +39,8 @@ public class DateTransformTest {
   private static final Schema INPUT3 = Schema.recordOf("input",
                                                        Schema.Field.of("a", Schema.of(Schema.Type.LONG)),
                                                        Schema.Field.of("b", Schema.of(Schema.Type.LONG)));
+  private static final Schema INVALID_INPUT = Schema.recordOf("input",
+                                                      Schema.Field.of("a", Schema.of(Schema.Type.BOOLEAN)));
 
   private static final Schema OUTPUT = Schema.recordOf("output",
                                                       Schema.Field.of("a", Schema.of(Schema.Type.STRING)),
@@ -117,5 +120,22 @@ public class DateTransformTest {
                                                                null, OUTPUT.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
     transform.initialize(null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testWrongFieldTransform() throws Exception {
+    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "MM/dd/yy",
+                                                               "b", "yyyy-MM-dd",
+                                                               null, OUTPUT.toString());
+    Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
+    transform.initialize(null);
+    Date date = new Date(System.currentTimeMillis());
+    DateFormat df1 = new SimpleDateFormat("MM/dd/yy");
+
+    MockEmitter<StructuredRecord> emitter = new MockEmitter<>();
+    transform.transform(StructuredRecord.builder(INVALID_INPUT)
+                          .set("a", "true")
+                          .build(), emitter);
+
   }
 }
