@@ -136,6 +136,13 @@ public class DateTransformTest {
     transform.transform(StructuredRecord.builder(INVALID_INPUT)
                           .set("a", "true")
                           .build(), emitter);
+  }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void testCOnfigValidateTransform() throws Exception {
+    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "MM/dd/yy",
+                                                               "b", "yyyy-MM-dd",
+                                                               null, OUTPUT.toString());
+    config.validate(INVALID_INPUT);
   }
 }

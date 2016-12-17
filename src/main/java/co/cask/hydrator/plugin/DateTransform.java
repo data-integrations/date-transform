@@ -64,7 +64,8 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
   @Override
   public void configurePipeline(PipelineConfigurer pipelineConfigurer) throws IllegalArgumentException {
     super.configurePipeline(pipelineConfigurer);
-    config.validate();
+    Schema inputSchema = pipelineConfigurer.getStageConfigurer().getInputSchema();
+    config.validate(inputSchema);
     try {
       pipelineConfigurer.getStageConfigurer().setOutputSchema(Schema.parseJson(config.schema));
     } catch (IOException e) {
@@ -117,8 +118,9 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
           Date date = inputFormat.parse(String.valueOf(input.get(sourceField)));
           builder.convertAndSet(targetField, outputFormat.format(date));
         } else {
-          throw new IllegalArgumentException("Input field type must be a long or a string but was: " +
-                                               inputFieldType.name());
+          throw new IllegalArgumentException("Source field: " + sourceField +
+                                             " must be of type string or long. It is type: " +
+                                             inputFieldType.name());
         }
       }
     }
@@ -210,7 +212,7 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
       return stringList;
     }
 
-    private void validate() throws IllegalArgumentException {
+    public void validate(Schema inputSchema) throws IllegalArgumentException {
       try {
         Schema outputSchema = Schema.parseJson(schema);
         if (!containsMacro(TARGET_FIELD_NAME)) {
@@ -241,6 +243,23 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
           }
           if (sourceField.split(",").length != targetField.split(",").length) {
             throw new IllegalArgumentException("Target and source fields must have the same number of fields.");
+          }
+        }
+      }
+      if (inputSchema == null) {
+        throw new IllegalArgumentException("Input schema cannot be null.");
+      }
+      List<String> sourceFields = getSourceFields();
+      for (String field : sourceFields) {
+        Schema inputFieldSchema = inputSchema.getField(field).getSchema();
+        if (inputFieldSchema.isSimpleOrNullableSimple()) {
+          Schema.Type inputFieldType = (inputFieldSchema.isNullableSimple())
+            ? inputFieldSchema.getNonNullable().getType()
+            : inputFieldSchema.getType();
+          if (!(inputFieldType == Schema.Type.STRING || inputFieldType == Schema.Type.LONG)) {
+            throw new IllegalArgumentException("Source field: " + field +
+                                               " must be of type string or long. It is type: " +
+                                               inputFieldType.name());
           }
         }
       }
