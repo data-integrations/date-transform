@@ -39,6 +39,8 @@ public class DateTransformTest {
   private static final Schema INPUT3 = Schema.recordOf("input",
                                                        Schema.Field.of("a", Schema.of(Schema.Type.LONG)),
                                                        Schema.Field.of("b", Schema.of(Schema.Type.LONG)));
+  private static final Schema INPUT4 =
+    Schema.recordOf("input", Schema.Field.of("a", Schema.nullableOf(Schema.of(Schema.Type.STRING))));
   private static final Schema INVALID_INPUT = Schema.recordOf("input",
                                                       Schema.Field.of("a", Schema.of(Schema.Type.BOOLEAN)));
 
@@ -48,6 +50,12 @@ public class DateTransformTest {
   private static final Schema OUTPUT2 = Schema.recordOf("output",
                                                         Schema.Field.of("c", Schema.of(Schema.Type.STRING)),
                                                         Schema.Field.of("d", Schema.of(Schema.Type.STRING)));
+  private static final Schema OUTPUT3 =
+    Schema.recordOf("output", Schema.Field.of("a", Schema.nullableOf(Schema.of(Schema.Type.STRING))),
+                    Schema.Field.of("b", Schema.of(Schema.Type.STRING)));
+  private static final Schema OUTPUT4 =
+    Schema.recordOf("output", Schema.Field.of("a", Schema.nullableOf(Schema.of(Schema.Type.STRING))),
+                    Schema.Field.of("b", Schema.nullableOf(Schema.of(Schema.Type.STRING))));
 
   @Test
   public void testDateTransform() throws Exception {
@@ -144,5 +152,56 @@ public class DateTransformTest {
                                                                "b", "yyyy-MM-dd",
                                                                null, OUTPUT.toString());
     config.validate(INVALID_INPUT);
+  }
+
+  @Test
+  public void testDateTransformWithNullValues() throws Exception {
+    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "MM/dd/yy",
+                                                               "b", "yyyy-MM-dd",
+                                                               null, OUTPUT3.toString());
+    Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
+    transform.initialize(null);
+    Date date = new Date(System.currentTimeMillis());
+    DateFormat df1 = new SimpleDateFormat("MM/dd/yy");
+
+    MockEmitter<StructuredRecord> emitter = new MockEmitter<>();
+    transform.transform(StructuredRecord.builder(INPUT4)
+                          .set("a", df1.format(date))
+                          .build(), emitter);
+    StructuredRecord errorRecord = StructuredRecord.builder(INPUT4).set("a", null).build();
+    transform.transform(errorRecord, emitter);
+
+    DateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
+    Assert.assertEquals(df2.format(date), emitter.getEmitted().get(0).get("b"));
+    Assert.assertEquals(1, emitter.getErrors().size());
+    Assert.assertEquals(errorRecord, emitter.getErrors().get(0).getInvalidRecord());
+  }
+
+  @Test
+  public void testDateTransformForNullableSchema() throws Exception {
+    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "MM/dd/yy",
+                                                               "b", "yyyy-MM-dd",
+                                                               null, OUTPUT4.toString());
+    Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
+    transform.initialize(null);
+    MockEmitter<StructuredRecord> emitter = new MockEmitter<>();
+    transform.transform(StructuredRecord.builder(INPUT4)
+                          .set("a", null)
+                          .build(), emitter);
+    Assert.assertNull(emitter.getEmitted().get(0).get("b"));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testInvalidData() throws Exception {
+    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "MM/dd/yy",
+                                                               "b", "yyyy-MM-dd",
+                                                               null, OUTPUT4.toString());
+    Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
+    transform.initialize(null);
+    MockEmitter<StructuredRecord> emitter = new MockEmitter<>();
+    transform.transform(StructuredRecord.builder(INPUT4)
+                          .set("a", "true")
+                          .build(), emitter);
+    Assert.fail();
   }
 }

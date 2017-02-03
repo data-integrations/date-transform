@@ -24,6 +24,7 @@ import co.cask.cdap.api.data.format.StructuredRecord;
 import co.cask.cdap.api.data.schema.Schema;
 import co.cask.cdap.api.plugin.PluginConfig;
 import co.cask.cdap.etl.api.Emitter;
+import co.cask.cdap.etl.api.InvalidEntry;
 import co.cask.cdap.etl.api.PipelineConfigurer;
 import co.cask.cdap.etl.api.Transform;
 import co.cask.cdap.etl.api.TransformContext;
@@ -103,24 +104,39 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
         continue;
       }
       Schema inputFieldSchema = input.getSchema().getField(sourceField).getSchema();
-      if (inputFieldSchema.isSimpleOrNullableSimple()) {
-        Schema.Type inputFieldType = (inputFieldSchema.isNullableSimple())
-                ? inputFieldSchema.getNonNullable().getType()
-                : inputFieldSchema.getType();
-        if (inputFieldType == Schema.Type.LONG) {
-          long ts = input.get(sourceField);
-          if (config.isInSeconds()) {
-            ts *= 1000;
+      try {
+        if (inputFieldSchema.isSimpleOrNullableSimple()) {
+          Schema.Type inputFieldType = (inputFieldSchema.isNullableSimple())
+            ? inputFieldSchema.getNonNullable().getType()
+            : inputFieldSchema.getType();
+          if (inputFieldType == Schema.Type.LONG) {
+            long ts = input.get(sourceField);
+            if (config.isInSeconds()) {
+              ts *= 1000;
+            }
+            Date date = new Date(ts);
+            builder.convertAndSet(targetField, outputFormat.format(date));
+          } else if (inputFieldType == Schema.Type.STRING) {
+            Date date = inputFormat.parse(String.valueOf(input.get(sourceField)));
+            builder.convertAndSet(targetField, outputFormat.format(date));
+          } else {
+            throw new IllegalArgumentException("Source field: " + sourceField +
+                                                 " must be of type string or long. It is type: " +
+                                                 inputFieldType.name());
           }
-          Date date = new Date(ts);
-          builder.convertAndSet(targetField, outputFormat.format(date));
-        } else if (inputFieldType == Schema.Type.STRING) {
-          Date date = inputFormat.parse(String.valueOf(input.get(sourceField)));
-          builder.convertAndSet(targetField, outputFormat.format(date));
+        }
+      } catch (Exception e) {
+        if (input.get(sourceField) == null || Strings.isNullOrEmpty(String.valueOf(input.get(sourceField)))) {
+          if (outputSchema.getField(targetField).getSchema().isNullable()) {
+            builder.set(targetField, null);
+          } else {
+            emitter.emitError(new InvalidEntry<>(31, e.getStackTrace()[0].toString() + " : " + e.getMessage(), input));
+            return;
+          }
         } else {
-          throw new IllegalArgumentException("Source field: " + sourceField +
-                                             " must be of type string or long. It is type: " +
-                                             inputFieldType.name());
+          throw new IllegalArgumentException(String.format("Cannot parse value %s for format %s. %s.",
+                                                           input.get(sourceField), config.targetFormat, e.getMessage()),
+                                             e);
         }
       }
     }
