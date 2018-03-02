@@ -50,6 +50,15 @@
           "widget-attributes": {
             "width": "large"
           }
+        },  {
+          "widget-type": "select",
+          "label": "Ignore Errors in parsing",
+          "name": "ignoreErrors",
+          "widget-attributes": {
+            "width": "large",
+            "values": [ "Yes", "No"],
+            "default": "No"
+          }
         }
       ]
     }

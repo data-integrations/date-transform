@@ -89,6 +89,7 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
     StructuredRecord.Builder builder = StructuredRecord.builder(outputSchema);
     List<String> sourceFields = config.getSourceFields();
     List<String> targetFields = config.getTargetFields();
+    String ignoreErrors = config.ignoreErrors;
 
     for (Schema.Field field : outputFields) {
       String name = field.getName();
@@ -134,9 +135,13 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
             return;
           }
         } else {
-          throw new IllegalArgumentException(String.format("Cannot parse value %s for format %s. %s.",
-                                                           input.get(sourceField), config.targetFormat, e.getMessage()),
-                                             e);
+          if (ignoreErrors.toLowerCase().equals("yes")) {
+            builder.set(targetField, input.get(sourceField));
+          } else {
+            throw new IllegalArgumentException(String.format("Cannot parse value %s for format %s. %s.",
+                input.get(sourceField), config.targetFormat, e.getMessage()),
+                e);
+          }
         }
       }
     }
@@ -181,25 +186,33 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
     @Nullable
     private String secondsOrMilliseconds;
 
+    @Name("ignoreErrors")
+    @Description("Ignore any errors in processing. If error dataset is used, the errors will not be ignored")
+    private String ignoreErrors;
+
     @Name("schema")
     @Description("Specifies the schema of the records outputted from this plugin.")
     private String schema;
 
+
+
     public MyConfig() {
       this.sourceFormat = DEFAULT_FORMAT;
       this.targetFormat = DEFAULT_FORMAT;
+      this.ignoreErrors = "No";
       this.secondsOrMilliseconds = "Milliseconds";
     }
 
     @VisibleForTesting
     public MyConfig(String sourceField, @Nullable String sourceFormat,
                     String targetField, @Nullable String targetFormat,
-                    @Nullable String secondsOrMilliseconds, String schema) {
+                    @Nullable String secondsOrMilliseconds, String ignoreErrors, String schema) {
       this.sourceField = sourceField;
       this.sourceFormat = sourceFormat;
       this.targetField = targetField;
       this.targetFormat = targetFormat;
       this.secondsOrMilliseconds = (secondsOrMilliseconds == null) ? "Milliseconds" : secondsOrMilliseconds;
+      this.ignoreErrors = ignoreErrors;
       this.schema = schema;
     }
 
