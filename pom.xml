@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright © 2016 Cask Data, Inc.
+  ~ Copyright © 2016 CDAP
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License"); you may not
   ~ use this file except in compliance with the License. You may obtain a copy of
@@ -21,22 +21,20 @@
   <modelVersion>4.0.0</modelVersion>
 
   <name>Date Transform</name>
-  <groupId>co.cask.hydrator.plugins</groupId>
+  <groupId>io.cdap.plugin</groupId>
   <artifactId>date-transform</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <packaging>jar</packaging>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <cdap.version>3.6.0</cdap.version>
-    <hydrator.version>1.4.0</hydrator.version>
+    <cdap.version>6.0.0-SNAPSHOT</cdap.version>
+    <hydrator.version>2.2.0-SNAPSHOT</hydrator.version>
     <!-- properties for script build step that creates the config files for the artifacts -->
     <widgets.dir>widgets</widgets.dir>
     <docs.dir>docs</docs.dir>
-    <etl.versionRange>[3.3.0,10.0.0-SNAPSHOT)</etl.versionRange>
+    <etl.versionRange>[6.0.0-SNAPSHOT,10.0.0-SNAPSHOT)</etl.versionRange>
     <app.parents>
-      system:cdap-etl-batch,
-      system:cdap-etl-realtime,
       system:cdap-data-pipeline,
       system:cdap-data-streams
     </app.parents>
@@ -58,27 +56,33 @@
 
   <dependencies>
     <dependency>
-      <groupId>co.cask.cdap</groupId>
+      <groupId>io.cdap.cdap</groupId>
       <artifactId>cdap-api</artifactId>
       <version>${cdap.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>co.cask.cdap</groupId>
+      <groupId>io.cdap.cdap</groupId>
       <artifactId>cdap-etl-api</artifactId>
       <version>${cdap.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>co.cask.cdap</groupId>
+      <groupId>io.cdap.cdap</groupId>
       <artifactId>cdap-unit-test</artifactId>
       <version>${cdap.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>co.cask.hydrator</groupId>
+      <groupId>io.cdap.plugin</groupId>
       <artifactId>hydrator-common</artifactId>
       <version>${hydrator.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.cdap.cdap</groupId>
+      <artifactId>hydrator-test</artifactId>
+      <version>${cdap.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -111,7 +115,7 @@
               <Embed-Transitive>true</Embed-Transitive>
               <Embed-Directory>lib</Embed-Directory>
               <!--Only @Plugin classes in the export packages will be included as plugin-->
-              <_exportcontents>co.cask.hydrator.plugin</_exportcontents>
+              <_exportcontents>io.cdap.plugin</_exportcontents>
             </instructions>
           </configuration>
           <executions>
