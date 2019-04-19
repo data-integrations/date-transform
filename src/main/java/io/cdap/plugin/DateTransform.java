@@ -100,8 +100,7 @@ public class DateTransform extends Transform<StructuredRecord, StructuredRecord>
       String sourceField = sourceFields.get(i);
       String targetField = targetFields.get(i);
 
-      if (input.getSchema().getField(sourceField) == null ||
-          input.get(sourceField) == null) {
+      if (input.getSchema().getField(sourceField) == null) {
         continue;
       }
       Schema inputFieldSchema = input.getSchema().getField(sourceField).getSchema();
