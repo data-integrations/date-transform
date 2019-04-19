@@ -1,3 +1,13 @@
+# Date Transform
+
+[![cm-available](https://cdap-users.herokuapp.com/assets/cm-available.svg)]
+(https://docs.cdap.io/cdap/current/en/integrations/cask-market.html)
+![cdap-transform](https://cdap-users.herokuapp.com/assets/cdap-transform.svg)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Join CDAP community](https://cdap-users.herokuapp.com/badge.svg?t=wrangler)](https://cdap-users.herokuapp.com?t=1)
+ 
+The [Date Transform](docs/DateTransform-transform.md) converts either a unix timestamp or a string to a formatted string.
+
 Build
 -----
 To build your plugins:
@@ -9,7 +19,7 @@ These files can be used to deploy your plugins.
 
 UI Integration
 --------------
-The Cask Hydrator UI displays each plugin property as a simple textbox. To customize how the plugin properties
+The CDAP pipeline UI displays each plugin property as a simple textbox. To customize how the plugin properties
 are displayed in the UI, you can place a configuration file in the ``widgets`` directory.
 The file must be named following a convention of ``[plugin-name]-[plugin-type].json``.
 

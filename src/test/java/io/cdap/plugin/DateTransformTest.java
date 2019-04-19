@@ -14,12 +14,12 @@
  * the License.
  */
 
-package co.cask.hydrator.plugin;
+package io.cdap.plugin;
 
-import co.cask.cdap.api.data.format.StructuredRecord;
-import co.cask.cdap.api.data.schema.Schema;
-import co.cask.cdap.etl.api.Transform;
-import co.cask.hydrator.common.test.MockEmitter;
+import io.cdap.cdap.api.data.format.StructuredRecord;
+import io.cdap.cdap.api.data.schema.Schema;
+import io.cdap.cdap.etl.api.Transform;
+import io.cdap.cdap.etl.mock.common.MockEmitter;
 import org.junit.Assert;
 import org.junit.Test;
 
