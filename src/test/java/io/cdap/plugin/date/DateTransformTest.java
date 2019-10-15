@@ -59,9 +59,9 @@ public class DateTransformTest {
 
   @Test
   public void testDateTransform() throws Exception {
-    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "MM/dd/yy",
-                                                               "b", "yyyy-MM-dd",
-                                                               null, OUTPUT.toString());
+    DateTransformConfig config = new DateTransformConfig("a", "MM/dd/yy",
+                                                         "b", "yyyy-MM-dd",
+                                                         null, OUTPUT.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
     transform.initialize(null);
     Date date = new Date(System.currentTimeMillis());
@@ -78,7 +78,7 @@ public class DateTransformTest {
 
   @Test
   public void testDateTransformLong() throws Exception {
-    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "MM/dd/yy",
+    DateTransformConfig config = new DateTransformConfig("a", "MM/dd/yy",
                                                                "b", "yyyy-MM-dd",
                                                                "Seconds", OUTPUT.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
@@ -95,7 +95,7 @@ public class DateTransformTest {
 
     @Test
     public void testDateTransformMultipleFields() throws Exception {
-        DateTransform.MyConfig config = new DateTransform.MyConfig("a,b", "MM/dd/yy",
+        DateTransformConfig config = new DateTransformConfig("a,b", "MM/dd/yy",
                                                                    "c,d", "yyyy-MM-dd",
                                                                    "Seconds", OUTPUT2.toString());
         Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
@@ -114,7 +114,7 @@ public class DateTransformTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testSourceFormatError() throws Exception {
-    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "1234sdfg",
+    DateTransformConfig config = new DateTransformConfig("a", "1234sdfg",
                                                                "b", "yyyy-MM-dd",
                                                                null, OUTPUT.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
@@ -123,7 +123,7 @@ public class DateTransformTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testTargetFormatError() throws Exception {
-    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "yyyy-MM-dd",
+    DateTransformConfig config = new DateTransformConfig("a", "yyyy-MM-dd",
                                                                "b", "1234523909r",
                                                                null, OUTPUT.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
@@ -132,7 +132,7 @@ public class DateTransformTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testWrongFieldTransform() throws Exception {
-    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "MM/dd/yy",
+    DateTransformConfig config = new DateTransformConfig("a", "MM/dd/yy",
                                                                "b", "yyyy-MM-dd",
                                                                null, OUTPUT.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
@@ -146,17 +146,9 @@ public class DateTransformTest {
                           .build(), emitter);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testCOnfigValidateTransform() throws Exception {
-    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "MM/dd/yy",
-                                                               "b", "yyyy-MM-dd",
-                                                               null, OUTPUT.toString());
-    config.validate(INVALID_INPUT);
-  }
-
   @Test
   public void testDateTransformWithNullValues() throws Exception {
-    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "MM/dd/yy",
+    DateTransformConfig config = new DateTransformConfig("a", "MM/dd/yy",
                                                                "b", "yyyy-MM-dd",
                                                                null, OUTPUT3.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
@@ -179,7 +171,7 @@ public class DateTransformTest {
 
   @Test
   public void testDateTransformForNullableSchema() throws Exception {
-    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "MM/dd/yy",
+    DateTransformConfig config = new DateTransformConfig("a", "MM/dd/yy",
                                                                "b", "yyyy-MM-dd",
                                                                null, OUTPUT4.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
@@ -193,7 +185,7 @@ public class DateTransformTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testInvalidData() throws Exception {
-    DateTransform.MyConfig config = new DateTransform.MyConfig("a", "MM/dd/yy",
+    DateTransformConfig config = new DateTransformConfig("a", "MM/dd/yy",
                                                                "b", "yyyy-MM-dd",
                                                                null, OUTPUT4.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new DateTransform(config);
