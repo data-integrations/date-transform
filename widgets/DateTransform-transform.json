@@ -9,7 +9,7 @@
         {
           "widget-type": "textbox",
           "label": "Source Field Name",
-          "name": "sourceField",
+          "name": "sourceFields",
           "widget-attributes": {
             "width": "large"
           }
@@ -19,7 +19,8 @@
           "label": "Source Field Date Format",
           "name": "sourceFormat",
           "widget-attributes": {
-            "width": "large"
+            "width": "large",
+            "default": "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
           }
         },
         {
@@ -38,9 +39,10 @@
         {
           "widget-type": "textbox",
           "label": "Target Field Name",
-          "name": "targetField",
+          "name": "targetFields",
           "widget-attributes": {
-            "width": "large"
+            "width": "large",
+            "default": "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
           }
         },
         {
